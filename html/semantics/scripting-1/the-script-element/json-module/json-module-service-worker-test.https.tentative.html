@@ -11,10 +11,15 @@
     }, "Javascript importing JSON Module should load within the context of a service worker");
 
     promise_test(async (test) => {
-        const reg = await navigator.serviceWorker.register('./module.json', { type: 'module' });
-        test.add_cleanup(() => reg.unregister());
-        assert_not_equals(reg.installing, undefined);
-    }, "JSON Modules should load within the context of a service worker");
+        return new Promise((resolve, reject) => {
+            const regPromise = navigator.serviceWorker.register('./module.json', { type: 'module' })
+            .then((registration) => {
+                reject("Attempting to load JSON as a service worker should fail");
+            }, test.step_func((error) => {
+                resolve();
+            }))
+        });
+    }, "Trying to register a service worker with a top-level JSON Module should fail");
 
     promise_test(async (test) => {
         const reg = await navigator.serviceWorker.register('./serviceworker-dynamic-import.js', { type: 'module' });
